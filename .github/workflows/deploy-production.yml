@@ -107,8 +107,10 @@ jobs:
             mkdir -p "${{ secrets.PROD_PATH }}/shared/storage/framework/sessions"
             mkdir -p "${{ secrets.PROD_PATH }}/shared/storage/framework/views"
             mkdir -p "${{ secrets.PROD_PATH }}/shared/storage/logs"
+
             if sudo -n true 2>/dev/null; then
-              sudo chown -R www-data:www-data "${{ secrets.PROD_PATH }}/shared"
+              sudo chown -R fellsing:www-data "${{ secrets.PROD_PATH }}/shared"
+              sudo chmod -R 775 "${{ secrets.PROD_PATH }}/shared"
             fi
             echo "✅ Shared directory created"
           else
@@ -120,7 +122,8 @@ jobs:
             echo "📁 Creating releases directory..."
             mkdir -p "${{ secrets.PROD_PATH }}/releases"
             if sudo -n true 2>/dev/null; then
-              sudo chown -R www-data:www-data "${{ secrets.PROD_PATH }}/releases"
+              sudo chown -R fellsing:www-data "${{ secrets.PROD_PATH }}/releases"
+              sudo chmod -R 775 "${{ secrets.PROD_PATH }}/releases"
             fi
             echo "✅ Releases directory created"
           fi
