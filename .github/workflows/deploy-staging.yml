@@ -5,7 +5,7 @@ on:
   workflow_run:
     workflows: ["Build & Release"]
     types: [completed]
-    branches: [develop]
+    branches: [main, feature/productos-crud]
 
   # Manual trigger
   workflow_dispatch:
