@@ -196,34 +196,29 @@ jobs:
           tar -xzf "/tmp/deploy-${TIMESTAMP}/${ARTIFACT_NAME}.tar.gz" -C "${RELEASE_DIR}"
 
           echo "🔗 Creating symlinks"
+          # Aseguramos que existan las carpetas en shared antes del enlace
+          mkdir -p shared/storage/app/public
+          mkdir -p shared/storage/framework/{cache/data,sessions,views}
+          mkdir -p shared/storage/logs
+          
           rm -rf "${RELEASE_DIR}/storage"
           ln -sfn "$(pwd)/shared/storage" "${RELEASE_DIR}/storage"
           ln -sfn "$(pwd)/shared/.env" "${RELEASE_DIR}/.env"
 
-          # Ensure storage directories exist with proper permissions
-          echo "📁 Ensuring storage structure exists"
-          mkdir -p shared/storage/app/public
-          mkdir -p shared/storage/framework/cache/data
-          mkdir -p shared/storage/framework/sessions
-          mkdir -p shared/storage/framework/views
-          mkdir -p shared/storage/logs
-          chmod -R 775 shared/storage
-
-          # Create bootstrap/cache if not exists
-          mkdir -p "${RELEASE_DIR}/bootstrap/cache"
-          chmod -R 775 "${RELEASE_DIR}/bootstrap/cache"
-
           echo "🔒 Setting permissions"
-          # Try with sudo first, fall back to regular commands if sudo not available
           if sudo -n true 2>/dev/null; then
             sudo chown -R www-data:www-data "${RELEASE_DIR}"
             sudo chown -R www-data:www-data shared/storage
+            
+            # 1. Permisos base: 644 para archivos, 755 para directorios
             sudo find "${RELEASE_DIR}" -type f -exec chmod 644 {} \;
             sudo find "${RELEASE_DIR}" -type d -exec chmod 755 {} \;
+            
+            # 2. Permisos especiales de ESCRITURA para Laravel
             sudo chmod -R 775 shared/storage
             sudo chmod -R 775 "${RELEASE_DIR}/bootstrap/cache"
           else
-            echo "⚠️ sudo not available, setting permissions without sudo"
+            echo "⚠️ sudo not available, setting permissions as current user"
             find "${RELEASE_DIR}" -type f -exec chmod 644 {} \;
             find "${RELEASE_DIR}" -type d -exec chmod 755 {} \;
             chmod -R 775 shared/storage 2>/dev/null || true
@@ -233,19 +228,19 @@ jobs:
           echo "🗃️ Creating database backup"
           mkdir -p shared/database/backups
           if command -v pg_dump &> /dev/null; then
-            source shared/.env
+            # Cargamos el env para obtener credenciales de backup
+            export $(grep -v '^#' shared/.env | xargs)
             PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -U "$DB_USERNAME" -Fc "$DB_DATABASE" > "shared/database/backups/pre-${TIMESTAMP}.sql" 2>/dev/null || echo "Backup skipped"
           fi
 
           echo "🔄 Running migrations"
           cd "${RELEASE_DIR}"
-          php artisan config:clear
-          php artisan migrate --force
+          # Usamos LOG_CHANNEL=stderr para que si falla, el error salga en la consola de GitHub
+          LOG_CHANNEL=stderr php artisan config:clear
+          LOG_CHANNEL=stderr php artisan migrate --force
 
           echo "⚡ Atomic switch"
           cd ${{ secrets.PROD_PATH }}
-
-          # Save previous release for rollback
           PREVIOUS=$(readlink -f current 2>/dev/null || echo "")
           if [ -n "$PREVIOUS" ]; then
             echo "$PREVIOUS" > shared/.previous_release
@@ -258,14 +253,10 @@ jobs:
           if sudo -n true 2>/dev/null; then
             sudo systemctl reload php8.4-fpm || sudo systemctl reload php8.2-fpm || true
             sudo nginx -s reload || true
-            sudo supervisorctl restart sistema-ventas-worker:* 2>/dev/null || true
-          else
-            echo "⚠️ sudo not available, skipping service reload (may need manual restart)"
           fi
 
           echo "🧹 Cleanup"
           rm -rf "/tmp/deploy-${TIMESTAMP}"
-
           cd releases
           ls -t | tail -n +4 | xargs -r rm -rf
 
