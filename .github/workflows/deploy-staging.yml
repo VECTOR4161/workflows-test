@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'develop')
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'feature/productos-crud')
     environment: staging
     steps:
       - name: Checkout Repository
@@ -41,9 +41,9 @@ jobs:
             RELEASE_TAG="${{ github.event.inputs.release_tag }}"
           else
             # Get latest release from develop
-            RELEASE_TAG=$(gh release list --limit 10 | grep -E 'develop' | head -1 | awk '{print $1}' || echo "")
+            RELEASE_TAG=$(gh release list --limit 10 | grep -E 'feature/productos-crud' | head -1 | awk '{print $1}' || echo "")
             if [ -z "$RELEASE_TAG" ]; then
-              echo "No release found for develop branch"
+              echo "No release found for feature/productos-crud branch"
               exit 1
             fi
           fi
@@ -68,7 +68,6 @@ jobs:
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
           port: ${{ secrets.STAGING_SSH_PORT }}
           script: |
             set -e
@@ -104,7 +103,6 @@ jobs:
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
           port: ${{ secrets.STAGING_SSH_PORT }}
           command_timeout: 10m
           script: |
@@ -202,7 +200,6 @@ jobs:
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
           port: ${{ secrets.STAGING_SSH_PORT }}
           script: |
             cd ${{ secrets.STAGING_PATH }}
