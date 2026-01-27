@@ -169,11 +169,13 @@ jobs:
             sudo supervisorctl restart sistema-ventas-worker:* 2>/dev/null || true
 
             echo "🧹 Cleanup"
-            rm -rf "/tmp/deploy-${TIMESTAMP}"
+            # Usamos sudo para borrar la carpeta temporal de despliegue
+            sudo rm -rf "/tmp/deploy-${TIMESTAMP}"
 
-            # Keep only last 3 releases
+            # Limpieza de versiones antiguas
             cd releases
-            ls -t | tail -n +4 | xargs -r rm -rf
+            # Listamos por tiempo, saltamos las 3 más nuevas y borramos el resto con sudo
+            ls -t | tail -n +4 | xargs -r sudo rm -rf
 
             echo "✅ Deployment complete"
 
