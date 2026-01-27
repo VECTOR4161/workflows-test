@@ -25,7 +25,7 @@ env:
 jobs:
   deploy:
     name: Deploy to Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'feature/productos-crud')
