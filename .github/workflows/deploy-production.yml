@@ -143,7 +143,7 @@ jobs:
           echo 'DB_CONNECTION=pgsql' >> "$ENV_FILE"
           echo 'DB_HOST=192.168.0.19' >> "$ENV_FILE"
           echo 'DB_PORT=5432' >> "$ENV_FILE"
-          echo 'DB_DATABASE=sistema_ventasdb' >> "$ENV_FILE"
+          echo 'DB_DATABASE=sistema_ventadb' >> "$ENV_FILE"
           echo 'DB_USERNAME=postgres' >> "$ENV_FILE"
           echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> "$ENV_FILE"
           echo '' >> "$ENV_FILE"
