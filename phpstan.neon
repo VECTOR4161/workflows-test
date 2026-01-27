@@ -1,0 +1,23 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/Http/Controllers
+        - app/Models
+        - app/Services
+
+    level: 4
+
+    ignoreErrors:
+        # Intentional validation in DetalleCompra - defensive programming
+        - '#If condition is always true#'
+
+    excludePaths:
+        - */database/*
+        - */tests/*
+        - */storage/*
+        - */bootstrap/cache/*
+        - */resources/*
+        - */config/*
+        - */routes/*
