@@ -135,20 +135,28 @@ jobs:
 
             echo "🔒 Setting permissions"
             sudo chown -R www-data:www-data "${RELEASE_DIR}"
+            sudo chmod -R 775 shared/storage
+
             sudo find "${RELEASE_DIR}" -type f -exec chmod 644 {} \;
             sudo find "${RELEASE_DIR}" -type d -exec chmod 755 {} \;
             sudo chmod -R 775 shared/storage
+            sudo chmod -R 775 "${RELEASE_DIR}/bootstrap/cache"
+            
 
             echo "🗃️ Creating database backup"
             mkdir -p shared/database/backups
             if command -v pg_dump &> /dev/null; then
-              source shared/.env
+              export $(grep -v '^#' shared/.env | xargs)
               PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -U "$DB_USERNAME" -Fc "$DB_DATABASE" > "shared/database/backups/pre-${TIMESTAMP}.sql" 2>/dev/null || echo "Backup skipped"
             fi
 
             echo "🔄 Running migrations"
             cd "${RELEASE_DIR}"
-            php artisan migrate --force
+            sudo rm -f bootstrap/cache/*.php
+
+            sudo -u www-data LOG_CHANNEL=stderr php artisan config:clear
+            sudo -u www-data LOG_CHANNEL=stderr php artisan cache:clear
+            sudo -u www-data LOG_CHANNEL=stderr php artisan migrate --force
 
             echo "⚡ Atomic switch"
             cd ${{ secrets.STAGING_PATH }}
