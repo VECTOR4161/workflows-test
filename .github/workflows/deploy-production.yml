@@ -259,9 +259,13 @@ jobs:
           fi
 
           echo "🧹 Cleanup"
-          rm -rf "/tmp/deploy-${TIMESTAMP}"
+          # Borrar la carpeta temporal con sudo
+          sudo rm -rf "/tmp/deploy-${TIMESTAMP}"
+
           cd releases
-          ls -t | tail -n +4 | xargs -r rm -rf
+          # Usar sudo para borrar las versiones antiguas (anteriores a las últimas 3)
+          # xargs necesita sudo para cada operación de rm
+          ls -t | tail -n +4 | xargs -r sudo rm -rf
 
           echo "✅ Deployment complete"
 
