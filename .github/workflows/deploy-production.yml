@@ -235,12 +235,12 @@ jobs:
 
           echo "🔄 Running migrations"
           cd "${RELEASE_DIR}"
-          # Usamos LOG_CHANNEL=stderr para que si falla, el error salga en la consola de GitHub
-          rm -f bootstrap/cache/*.php
+          sudo rm -f bootstrap/cache/*.php
           export APP_ENV=production
-          LOG_CHANNEL=stderr php artisan config:clear
-          LOG_CHANNEL=stderr php artisan cache:clear
-          LOG_CHANNEL=stderr php artisan migrate --force
+          
+          sudo -u www-data LOG_CHANNEL=stderr php artisan config:clear
+          sudo -u www-data LOG_CHANNEL=stderr php artisan cache:clear
+          sudo -u www-data LOG_CHANNEL=stderr php artisan migrate --force
 
           echo "⚡ Atomic switch"
           cd ${{ secrets.PROD_PATH }}
