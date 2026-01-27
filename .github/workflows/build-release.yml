@@ -47,7 +47,8 @@ jobs:
           fi
           TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          BRANCH_NAME=${{ github.ref_name }}
+
+          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
 
           if [ "$BRANCH_NAME" == "main" ]; then
             RELEASE_NAME="v${VERSION}-${TIMESTAMP}"
