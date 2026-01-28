@@ -14,7 +14,8 @@ use App\Http\Controllers\Api\VentaController;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/health', HealthController::class);
+Route::get('/health', HealthC
+ontroller::class);
 
 /*
 |--------------------------------------------------------------------------
