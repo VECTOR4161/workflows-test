@@ -22,10 +22,12 @@ Route::get('/health', HealthController::class);
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->g
+roup(function () {
 
     // Auth Público
-    Route::post('auth/login', [AuthController::class, 'login']);
+    Route::post('auth/login', [AuthContr
+    oller::class, 'login']);
 
     // Rutas Protegidas
     Route::middleware('auth:sanctum')->group(function () {
